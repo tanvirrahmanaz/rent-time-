@@ -1,156 +1,104 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import Logo from './Logo'; // আপনার লোগো কম্পোনেন্ট
+import React, { useState } from 'react';
+// react-router-dom ব্যবহার করলে <a> এর বদলে Link ব্যবহার করতে পারেন
+// import { Link } from 'react-router-dom'; 
 
-const pages = ['Room-Mate', 'House', 'Blog'];
-const settings = ['Profile', 'Dashboard', 'Logout'];
+const Navbar = () => {
+    // মোবাইল মেন্যু খোলা বা বন্ধ করার জন্য State
+    const [isOpen, setIsOpen] = useState(false);
 
-function Navbar() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+    // নেভিগেশন লিঙ্কগুলোর জন্য একটি অ্যারে (সহজে পরিবর্তনের জন্য)
+    const navLinks = [
+        { href: '#', text: 'Home' },
+        { href: '#', text: 'Roommate' },
+        { href: '#', text: 'House' },
+        { href: '#', text: 'Blog' },
+    ];
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
+    return (
+        <nav className="bg-white shadow-md sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    
+                    {/* বাম পাশ: লোগো */}
+                    <div className="flex-shrink-0">
+                        <a href="/" className="flex items-center space-x-2">
+                            {/*  */}
+                            <svg className="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="font-bold text-xl text-gray-800">RentTime</span>
+                        </a>
+                    </div>
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
+                    {/* মাঝখানের অংশ: ডেস্কটপ এবং ট্যাবলেট মেন্যু */}
+                    <div className="hidden md:block">
+                        <div className="ml-10 flex items-baseline space-x-4">
+                            {navLinks.map((link) => (
+                                <a 
+                                    key={link.text} 
+                                    href={link.href} 
+                                    className="text-gray-700 hover:bg-indigo-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                >
+                                    {link.text}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+                    {/* ডান পাশ: লগইন/সাইনআপ বাটন (ডেস্কটপ) */}
+                    <div className="hidden md:flex items-center space-x-2">
+                        <a href="#" className="text-gray-700 hover:text-indigo-600 font-medium text-sm px-4 py-2">Login</a>
+                        <a href="#" className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition duration-300">
+                            Sign Up
+                        </a>
+                    </div>
+                    
+                    {/* মোবাইল মেন্যু বাটন (হ্যামবার্গার) */}
+                    <div className="-mr-2 flex md:hidden">
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            type="button"
+                            className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-indigo-600 focus:outline-none"
+                            aria-controls="mobile-menu"
+                            aria-expanded="false"
+                        >
+                            <span className="sr-only">Open main menu</span>
+                            {!isOpen ? (
+                                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            ) : (
+                                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-  return (
-    // AppBar এখন থিম থেকে primary কালার ব্যবহার করবে
-    <AppBar position="static" color="primary"> 
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          {/* Logo for Desktop */}
-          <Logo sx={{ display: { xs: 'none', md: 'flex' }, height: 40, mr: 1, borderRadius: 5 }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.2rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            RENT-TIME
-          </Typography>
+            {/* মোবাইল মেন্যু (শর্তসাপেক্ষে রেন্ডারিং) */}
+            <div className={`md:hidden ${isOpen ? 'block' : 'hidden'}`} id="mobile-menu">
+                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    {navLinks.map((link) => (
+                        <a 
+                            key={link.text} 
+                            href={link.href} 
+                            className="text-gray-700 hover:bg-indigo-600 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                        >
+                            {link.text}
+                        </a>
+                    ))}
+                </div>
+                <div className="pt-4 pb-3 border-t border-gray-200">
+                    <div className="px-2 space-y-2">
+                         <a href="#" className="block w-full text-left text-gray-700 hover:bg-indigo-600 hover:text-white px-3 py-2 rounded-md text-base font-medium">Login</a>
+                         <a href="#" className="block w-full text-center bg-indigo-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-indigo-700">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+};
 
-          {/* Menu for Mobile */}
-          <Box sx={{ flexGrow: 1, borderRadius: 5, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-              keepMounted
-              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: 'block', md: 'none' } }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-
-          {/* Logo for Mobile */}
-          <Logo sx={{ display: { xs: 'flex', md: 'none' }, height: 35, mr: 1 , borderRadius: 5, }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.2rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            RENT-TIME
-          </Typography>
-
-          {/* Navigation Buttons for Desktop */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page}
-              </Button>
-            ))}
-          </Box>
-
-          {/* User Avatar and Settings Menu */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="User" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar-user"
-              anchorEl={anchorElUser}
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              keepMounted
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  );
-}
 export default Navbar;
