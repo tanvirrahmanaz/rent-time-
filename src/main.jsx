@@ -21,6 +21,9 @@ import HousePage from './components/pages/HousePage';
 import DashboardPage from './components/pages/DashboardPage';
 import BlogListPage from './components/pages/BlogListPage';
 import BlogPostPage from './components/pages/BlogPostPage';
+import BookingRequestsPage from './components/pages/BookingRequestsPage';
+import MyRequestsPage from './components/pages/MyRequestsPage';
+
 // import App from './App.jsx'; // App.jsx এর আর প্রয়োজন নেই
 
 // রাউটার তৈরি করুন
@@ -79,6 +82,14 @@ const router = createBrowserRouter([
         path: "/blog/:slug", // ডাইনামিক রুট
         element: <BlogPostPage />,
       },
+      {
+        path: "/dashboard/booking-requests",
+        element: (<PrivateRoute><BookingRequestsPage /></PrivateRoute>),
+      },
+      {
+    path: "/dashboard/my-requests",
+    element: (<PrivateRoute><MyRequestsPage /></PrivateRoute>),
+},
 
       // এখানে আপনার অন্যান্য পেইজের জন্য রুট যোগ করতে পারেন
       // যেমন: /house, /roommate, /blog ইত্যাদি
