@@ -15,6 +15,9 @@ import LoginPage from './components/pages/Login';
 import SignUpPage from './components/pages/SignUpPage';
 import NotFoundPage from './components/pages/NotFoundPage';
 import CreatePostPage from './components/pages/CreatePostPage';
+import PostDetailsPage from './components/pages/PostDetailsPage';
+import RoommatePage from './components/pages/RoommatePage';
+import HousePage from './components/pages/HousePage';
 // import App from './App.jsx'; // App.jsx এর আর প্রয়োজন নেই
 
 // রাউটার তৈরি করুন
@@ -45,7 +48,19 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      
+      {
+        path: "/post/:id", // নতুন ডাইনামিক রুট
+        element: <PostDetailsPage />,
+      },
+      {
+        path: "/house",
+        element: <HousePage />,
+      },
+      {
+        path: "/roommate",
+        element: <RoommatePage />,
+      },
+
       // এখানে আপনার অন্যান্য পেইজের জন্য রুট যোগ করতে পারেন
       // যেমন: /house, /roommate, /blog ইত্যাদি
     ],
