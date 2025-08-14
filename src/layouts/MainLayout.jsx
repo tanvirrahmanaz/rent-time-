@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Shared/Navbar'; // আপনার Navbar কম্পোনেন্টের পাথ
+import Footer from '../components/Shared/Footer';
 
 const MainLayout = () => {
     return (
@@ -11,6 +12,7 @@ const MainLayout = () => {
                 <Outlet />
             </main>
             {/* আপনি চাইলে এখানে একটি Footer যোগ করতে পারেন */}
+            <Footer></Footer>
         </div>
     );
 };
