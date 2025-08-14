@@ -2,10 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import './index.css';
+import PrivateRoute from './components/Routes/PrivateRoute';
 
 // থিম এবং অন্যান্য ইমপোর্ট
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from './theme'; 
+import { theme } from './theme';
 
 // লেআউট এবং পেইজগুলো ইমপোর্ট করুন
 import MainLayout from './layouts/MainLayout';
@@ -13,6 +14,7 @@ import HomePage from './components/Layout/HomeLayout';
 import LoginPage from './components/pages/Login';
 import SignUpPage from './components/pages/SignUpPage';
 import NotFoundPage from './components/pages/NotFoundPage';
+import CreatePostPage from './components/pages/CreatePostPage';
 // import App from './App.jsx'; // App.jsx এর আর প্রয়োজন নেই
 
 // রাউটার তৈরি করুন
@@ -34,6 +36,16 @@ const router = createBrowserRouter([
         path: "/signup",
         element: <SignUpPage />,
       },
+
+      {
+        path: "/create-post",
+        element: (
+          <PrivateRoute>
+            <CreatePostPage />
+          </PrivateRoute>
+        ),
+      },
+      
       // এখানে আপনার অন্যান্য পেইজের জন্য রুট যোগ করতে পারেন
       // যেমন: /house, /roommate, /blog ইত্যাদি
     ],
