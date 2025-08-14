@@ -5,7 +5,6 @@ import HeroSection from '../Shared/HeroSection/HeroSection';
 const HomeLayout = () => {
     return (
         <div>
-            <Navbar></Navbar>
             <HeroSection></HeroSection>
         </div>
     );
