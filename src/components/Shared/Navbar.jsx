@@ -8,7 +8,6 @@ const Navbar = () => {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
-
     const userMenuRef = useRef(null);
 
     // --- Authentication State Listener ---
@@ -30,7 +29,6 @@ const Navbar = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
 
     // --- Logout Function ---
     const handleLogout = async () => {
@@ -59,86 +57,165 @@ const Navbar = () => {
     // --- Placeholder for Auth buttons while loading ---
     const AuthPlaceholder = () => (
         <div className="flex items-center space-x-4">
-             <div className="h-11 w-20 bg-gray-200 rounded-full animate-pulse"></div>
-             <div className="h-11 w-28 bg-gray-200 rounded-full animate-pulse"></div>
+             <div className="h-11 w-20 bg-slate-200 rounded-full animate-pulse"></div>
+             <div className="h-11 w-28 bg-slate-200 rounded-full animate-pulse"></div>
         </div>
     );
 
     return (
-        <nav className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-50">
+        <nav className="bg-white/98 backdrop-blur-lg shadow-xl border-b border-slate-200/50 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
-
                     {/* Left Side: Logo */}
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center space-x-3 group">
                              <div className="relative">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
-                                <div className="relative bg-gradient-to-r from-slate-700 to-slate-800 p-2 rounded-lg">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                                <div className="relative bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 p-3 rounded-xl shadow-lg">
                                     <svg className="h-7 w-7 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
                                 </div>
                             </div>
                             <div>
-                                <span className="font-black text-2xl bg-gradient-to-r from-slate-700 to-slate-900 text-transparent bg-clip-text">
+                                <span className="font-bold text-2xl bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 text-transparent bg-clip-text tracking-tight">
                                     RentTime
                                 </span>
+                                <p className="text-xs text-slate-500 -mt-1">Find Your Perfect Space</p>
                             </div>
                         </Link>
                     </div>
 
                     {/* Center: Desktop Navigation */}
                     <div className="hidden md:block">
-                        <div className="flex items-center space-x-1 bg-gray-100/80 rounded-full p-2">
+                        <div className="flex items-center space-x-2 bg-slate-100/70 rounded-2xl p-2 backdrop-blur-sm">
                             {publicNavLinks.map((link) => (
-                                <NavLink key={link.text} to={link.to} className={({ isActive }) => `text-gray-600 px-5 py-2 rounded-full text-sm font-semibold transition-all ${isActive ? 'bg-white shadow-sm text-slate-900' : 'hover:bg-white/80'}`}>{link.text}</NavLink>
+                                <NavLink 
+                                    key={link.text} 
+                                    to={link.to} 
+                                    className={({ isActive }) => 
+                                        `text-slate-700 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 relative overflow-hidden ${
+                                            isActive 
+                                                ? 'bg-white shadow-lg text-slate-900 border border-slate-200/50' 
+                                                : 'hover:bg-white/70 hover:shadow-md'
+                                        }`
+                                    }
+                                >
+                                    {link.text}
+                                </NavLink>
                             ))}
                             {currentUser && privateNavLinks.map((link) => (
-                                <NavLink key={link.text} to={link.to} className={({ isActive }) => `text-gray-600 px-5 py-2 rounded-full text-sm font-semibold transition-all ${isActive ? 'bg-white shadow-sm text-slate-900' : 'hover:bg-white/80'}`}>{link.text}</NavLink>
+                                <NavLink 
+                                    key={link.text} 
+                                    to={link.to} 
+                                    className={({ isActive }) => 
+                                        `text-slate-700 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                                            isActive 
+                                                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' 
+                                                : 'hover:bg-white/70 hover:shadow-md'
+                                        }`
+                                    }
+                                >
+                                    {link.text}
+                                </NavLink>
                             ))}
                         </div>
                     </div>
 
                     {/* Right Side: Action Buttons or User Avatar */}
                     <div className="hidden md:flex items-center space-x-4">
-                        {loading ? <AuthPlaceholder /> : currentUser ? (
+                        {loading ? (
+                            <AuthPlaceholder />
+                        ) : currentUser ? (
                             <div className="relative" ref={userMenuRef}>
-                                <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="focus:outline-none rounded-full">
-                                    
+                                <button 
+                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
+                                    className="focus:outline-none rounded-full relative group"
+                                >
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
                                     {currentUser.photoURL ? (
-                                        <img src={currentUser.photoURL} alt="Profile" className="w-11 h-11 rounded-full border-2 border-emerald-500 p-0.5 object-cover" />
+                                        <img 
+                                            src={currentUser.photoURL} 
+                                            alt="Profile" 
+                                            className="relative w-12 h-12 rounded-full border-3 border-white shadow-lg object-cover" 
+                                        />
                                     ) : (
-                                        <div className="w-11 h-11 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-lg border-2 border-emerald-600">
+                                        <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                                             {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
                                         </div>
                                     )}
                                 </button>
+
                                 {isUserMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-xl py-1 z-20 border border-gray-100">
-                                        <div className="px-4 py-3 border-b flex items-center space-x-3">
-                                            {currentUser.photoURL ? <img src={currentUser.photoURL} alt="Profile" className="w-10 h-10 rounded-full object-cover" /> : <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">{currentUser.displayName?.charAt(0).toUpperCase() || 'U'}</div>}
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-800 truncate">{currentUser.displayName || 'User'}</p>
-                                                <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
+                                    <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl py-2 z-20 border border-slate-200/50 backdrop-blur-lg">
+                                        <div className="px-4 py-4 border-b border-slate-100 flex items-center space-x-3">
+                                            {currentUser.photoURL ? (
+                                                <img 
+                                                    src={currentUser.photoURL} 
+                                                    alt="Profile" 
+                                                    className="w-12 h-12 rounded-full object-cover shadow-md" 
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                                                    {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-slate-900 truncate">{currentUser.displayName || 'User'}</p>
+                                                <p className="text-xs text-slate-500 truncate">{currentUser.email}</p>
                                             </div>
                                         </div>
-                                        <Link to="/dashboard" onClick={() => setIsUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</Link>
-                                        <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-red-600 font-semibold hover:bg-red-50">Logout</button>
+                                        
+                                        <div className="py-2">
+                                            <Link 
+                                                to="/dashboard" 
+                                                onClick={() => setIsUserMenuOpen(false)} 
+                                                className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+                                            >
+                                                <svg className="w-4 h-4 mr-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                                </svg>
+                                                Dashboard
+                                            </Link>
+                                            
+                                            <button 
+                                                onClick={handleLogout} 
+                                                className="flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200 font-medium"
+                                            >
+                                                <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                </svg>
+                                                Logout
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <>
-                                <Link to="/login" className="text-gray-600 hover:text-slate-700 font-semibold text-sm px-6 py-3">Login</Link>
-                                <Link to="/signup" className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-full text-sm font-semibold hover:shadow-lg transition-all">Sign Up</Link>
-                            </>
+                            <div className="flex items-center space-x-3">
+                                <Link 
+                                    to="/login" 
+                                    className="text-slate-700 hover:text-slate-900 font-semibold text-sm px-6 py-3 rounded-xl hover:bg-slate-100 transition-all duration-300"
+                                >
+                                    Login
+                                </Link>
+                                <Link 
+                                    to="/signup" 
+                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                >
+                                    Sign Up
+                                </Link>
+                            </div>
                         )}
                     </div>
 
                     {/* Mobile Menu Button */}
                     <div className="md:hidden">
-                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} type="button" className="bg-gray-50 hover:bg-gray-100 inline-flex items-center justify-center p-3 rounded-xl text-gray-600">
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+                            type="button" 
+                            className="bg-slate-100 hover:bg-slate-200 inline-flex items-center justify-center p-3 rounded-xl text-slate-700 transition-all duration-300"
+                        >
                             <span className="sr-only">Open main menu</span>
                             <div className="relative w-6 h-6">
                                 <span className={`absolute block w-6 h-0.5 bg-current transform transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 top-3' : 'top-1.5'}`}></span>
@@ -151,33 +228,96 @@ const Navbar = () => {
             </div>
 
             {/* --- Mobile Menu Panel --- */}
-            <div className={`md:hidden transition-all duration-300 ease-in-out border-t border-gray-200 ${isMobileMenuOpen ? 'max-h-screen py-4' : 'max-h-0 py-0 opacity-0 overflow-hidden'}`}>
-                <div className="px-2 space-y-1 sm:px-3">
+            <div className={`md:hidden transition-all duration-500 ease-in-out border-t border-slate-200/50 backdrop-blur-lg ${isMobileMenuOpen ? 'max-h-screen py-6 opacity-100' : 'max-h-0 py-0 opacity-0 overflow-hidden'}`}>
+                <div className="px-4 space-y-2">
                     {publicNavLinks.map((link) => (
-                         <NavLink key={link.text} to={link.to} onClick={() => setIsMobileMenuOpen(false)} className={({isActive}) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-50'}`}>{link.text}</NavLink>
+                         <NavLink 
+                            key={link.text} 
+                            to={link.to} 
+                            onClick={() => setIsMobileMenuOpen(false)} 
+                            className={({isActive}) => 
+                                `block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-300 ${
+                                    isActive 
+                                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' 
+                                        : 'text-slate-700 hover:bg-slate-100'
+                                }`
+                            }
+                        >
+                            {link.text}
+                        </NavLink>
                     ))}
-                    {currentUser && <div className="border-t my-2"></div>}
+                    
+                    {currentUser && <div className="border-t border-slate-200 my-4"></div>}
+                    
                     {currentUser && privateNavLinks.map((link) => (
-                         <NavLink key={link.text} to={link.to} onClick={() => setIsMobileMenuOpen(false)} className={({isActive}) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-50'}`}>{link.text}</NavLink>
+                         <NavLink 
+                            key={link.text} 
+                            to={link.to} 
+                            onClick={() => setIsMobileMenuOpen(false)} 
+                            className={({isActive}) => 
+                                `block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-300 ${
+                                    isActive 
+                                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' 
+                                        : 'text-slate-700 hover:bg-slate-100'
+                                }`
+                            }
+                        >
+                            {link.text}
+                        </NavLink>
                     ))}
                 </div>
-                <div className="px-4 mt-4 pt-4 border-t border-gray-100 space-y-3">
-                    {loading ? <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-full"></div> : currentUser ? (
-                         <div className="space-y-3">
-                             <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50">
-                                 {currentUser.photoURL ? <img src={currentUser.photoURL} alt="Profile" className="w-10 h-10 rounded-full object-cover"/> : <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">{currentUser.displayName?.charAt(0).toUpperCase() || 'U'}</div>}
-                                 <div>
-                                     <p className="font-semibold text-gray-800">{currentUser.displayName || 'Dashboard'}</p>
-                                     <p className="text-xs text-gray-500">View your dashboard</p>
+
+                <div className="px-4 mt-6 pt-4 border-t border-slate-200 space-y-4">
+                    {loading ? (
+                        <div className="h-12 bg-slate-200 rounded-xl animate-pulse w-full"></div>
+                    ) : currentUser ? (
+                         <div className="space-y-4">
+                             <Link 
+                                to="/dashboard" 
+                                onClick={() => setIsMobileMenuOpen(false)} 
+                                className="flex items-center space-x-4 p-4 rounded-xl hover:bg-slate-50 transition-all duration-300"
+                            >
+                                 {currentUser.photoURL ? (
+                                    <img 
+                                        src={currentUser.photoURL} 
+                                        alt="Profile" 
+                                        className="w-12 h-12 rounded-full object-cover shadow-md"
+                                    />
+                                 ) : (
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                                        {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
+                                    </div>
+                                 )}
+                                 <div className="flex-1 min-w-0">
+                                     <p className="font-semibold text-slate-900 truncate">{currentUser.displayName || 'Dashboard'}</p>
+                                     <p className="text-sm text-slate-500 truncate">View your dashboard</p>
                                  </div>
                              </Link>
-                            <button onClick={handleLogout} className="w-full text-center bg-red-100 text-red-700 px-4 py-3 rounded-xl text-base font-semibold">Logout</button>
+                            
+                            <button 
+                                onClick={handleLogout} 
+                                className="w-full text-center bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-4 rounded-xl text-base font-semibold shadow-lg transition-all duration-300"
+                            >
+                                Logout
+                            </button>
                          </div>
                     ) : (
-                         <>
-                            <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="block text-center text-gray-600 hover:text-slate-700 hover:bg-gray-50 px-4 py-3 rounded-xl text-base font-semibold">Login</Link>
-                            <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} className="block text-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-3 rounded-xl text-base font-semibold shadow-lg">Sign Up</Link>
-                         </>
+                         <div className="space-y-3">
+                            <Link 
+                                to="/login" 
+                                onClick={() => setIsMobileMenuOpen(false)} 
+                                className="block text-center text-slate-700 hover:text-slate-900 hover:bg-slate-100 px-6 py-4 rounded-xl text-base font-semibold transition-all duration-300"
+                            >
+                                Login
+                            </Link>
+                            <Link 
+                                to="/signup" 
+                                onClick={() => setIsMobileMenuOpen(false)} 
+                                className="block text-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-xl text-base font-semibold shadow-lg transition-all duration-300"
+                            >
+                                Sign Up
+                            </Link>
+                         </div>
                     )}
                 </div>
             </div>
