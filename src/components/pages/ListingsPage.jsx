@@ -52,7 +52,9 @@ const ListingsPage = ({ postType, title, subtitle }) => {
                     <>
                         <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
                             {posts.map(post => (
-                                <PostCard key={post._id} post={post} />
+                                <Link to={`/post/${post._id}`} key={post._id}>
+                                    <PostCard post={post} />
+                                </Link>
                             ))}
                         </div>
                         

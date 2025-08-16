@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Filter } from 'lucide-react';
 import PostCard from '../Shared/PostCard';
 import Pagination from '../Shared/Pagination';
 
@@ -10,7 +11,6 @@ const ListingsSection = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     
-    // --- ফিল্টারের জন্য নতুন স্টেট ---
     const [filters, setFilters] = useState({
         type: '',
         location: '',
@@ -18,11 +18,12 @@ const ListingsSection = () => {
         maxPrice: '',
     });
 
+    const [showFilters, setShowFilters] = useState(false);
+
     useEffect(() => {
         const fetchPosts = async () => {
             setLoading(true);
             try {
-                // API URL এ ফিল্টার প্যারামিটার যোগ করুন
                 const query = new URLSearchParams({
                     page: currentPage,
                     limit: 9,
@@ -41,71 +42,183 @@ const ListingsSection = () => {
                 setLoading(false);
             }
         };
-
         fetchPosts();
-    }, [currentPage, filters]); // currentPage বা filters পরিবর্তন হলে useEffect আবার রান হবে
+    }, [currentPage, filters]);
 
     const handleFilterChange = (e) => {
         setFilters({
             ...filters,
             [e.target.name]: e.target.value,
         });
+        setCurrentPage(1); // Reset to first page when filters change
     };
     
-    // পেইজ পরিবর্তনের হ্যান্ডলার
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const clearFilters = () => {
+        setFilters({
+            type: '',
+            location: '',
+            minPrice: '',
+            maxPrice: '',
+        });
+        setCurrentPage(1);
+    };
+
+    const hasActiveFilters = Object.values(filters).some(filter => filter !== '');
+
     return (
-        <section className="bg-gray-50 py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <h2 className="text-3xl font-extrabold text-gray-900">Browse Listings</h2>
-                    <p className="mt-4 text-lg text-gray-600">Find the latest rooms, houses, and roommates with advanced filters.</p>
-                </div>
-
-                {/* --- Filter Form --- */}
-                <div className="mt-10 p-6 bg-white rounded-lg shadow-md grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    {/* Type Filter */}
-                    <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700">Type</label>
-                        <select id="type" name="type" onChange={handleFilterChange} value={filters.type} className="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">All</option>
-                            <option value="house">House/Room</option>
-                            <option value="roommate">Roommate</option>
-                        </select>
-                    </div>
-                    {/* Location Filter */}
-                    <div>
-                        <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
-                        <input type="text" id="location" name="location" onChange={handleFilterChange} value={filters.location} placeholder="e.g., Dhanmondi" className="mt-1 block w-full p-2 border border-gray-300 rounded-md"/>
-                    </div>
-                    {/* Price Filter */}
-                    <div className="md:col-span-2 grid grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="minPrice" className="block text-sm font-medium text-gray-700">Min Price</label>
-                            <input type="number" id="minPrice" name="minPrice" onChange={handleFilterChange} value={filters.minPrice} placeholder="0" className="mt-1 block w-full p-2 border border-gray-300 rounded-md"/>
-                        </div>
-                        <div>
-                            <label htmlFor="maxPrice" className="block text-sm font-medium text-gray-700">Max Price</label>
-                            <input type="number" id="maxPrice" name="maxPrice" onChange={handleFilterChange} value={filters.maxPrice} placeholder="50000" className="mt-1 block w-full p-2 border border-gray-300 rounded-md"/>
-                        </div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50">
+            {/* Hero Section */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 text-white py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
+                            Find Your Perfect Home
+                        </h1>
+                        <p className="text-xl opacity-90 max-w-2xl mx-auto leading-relaxed">
+                            Discover amazing rooms, houses, and roommates with our advanced search filters and seamless browsing experience.
+                        </p>
                     </div>
                 </div>
+            </div>
 
-                {/* --- Listings Grid --- */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+                {/* Enhanced Filter Section */}
+                <div className="bg-white rounded-2xl shadow-2xl p-8 mb-12 border border-gray-100">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-indigo-100 rounded-lg">
+                                <Search className="w-6 h-6 text-indigo-600" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900">Search & Filter</h2>
+                        </div>
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="lg:hidden flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        >
+                            <Filter className="w-4 h-4 mr-2" />
+                            Filters
+                        </button>
+                    </div>
+
+                    <div className={`grid grid-cols-1 lg:grid-cols-4 gap-6 ${showFilters ? 'block' : 'hidden lg:grid'}`}>
+                        {/* Type Filter */}
+                        <div className="space-y-2">
+                            <label htmlFor="type" className="block text-sm font-semibold text-gray-700">
+                                Property Type
+                            </label>
+                            <select 
+                                id="type" 
+                                name="type" 
+                                onChange={handleFilterChange} 
+                                value={filters.type}
+                                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                            >
+                                <option value="">All Types</option>
+                                <option value="house">🏠 House/Room</option>
+                                <option value="roommate">👥 Roommate</option>
+                            </select>
+                        </div>
+
+                        {/* Location Filter */}
+                        <div className="space-y-2">
+                            <label htmlFor="location" className="block text-sm font-semibold text-gray-700">
+                                Location
+                            </label>
+                            <div className="relative">
+                                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input 
+                                    type="text" 
+                                    id="location" 
+                                    name="location" 
+                                    onChange={handleFilterChange} 
+                                    value={filters.location}
+                                    placeholder="e.g., Dhanmondi, Gulshan"
+                                    className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Price Range */}
+                        <div className="lg:col-span-2 space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">Price Range (BDT)</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <input 
+                                    type="number" 
+                                    id="minPrice" 
+                                    name="minPrice" 
+                                    onChange={handleFilterChange} 
+                                    value={filters.minPrice}
+                                    placeholder="Min Price"
+                                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                />
+                                <input 
+                                    type="number" 
+                                    id="maxPrice" 
+                                    name="maxPrice" 
+                                    onChange={handleFilterChange} 
+                                    value={filters.maxPrice}
+                                    placeholder="Max Price"
+                                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {hasActiveFilters && (
+                        <div className="mt-6 flex items-center justify-between p-4 bg-indigo-50 rounded-xl">
+                            <span className="text-sm text-indigo-700 font-medium">
+                                Filters applied • {posts.length} results found
+                            </span>
+                            <button
+                                onClick={clearFilters}
+                                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium underline"
+                            >
+                                Clear all filters
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Results Section */}
                 {loading ? (
-                    <div className="text-center p-10">Loading listings...</div>
+                    <div className="text-center py-20">
+                        <div className="inline-flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                            <span className="text-lg text-gray-600">Loading amazing listings...</span>
+                        </div>
+                    </div>
                 ) : error ? (
-                    <div className="text-center p-10 text-red-500">Error: {error}</div>
+                    <div className="text-center py-20">
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
+                            <div className="text-red-600 text-xl font-semibold mb-2">Oops! Something went wrong</div>
+                            <p className="text-red-500">{error}</p>
+                        </div>
+                    </div>
                 ) : posts.length > 0 ? (
                     <>
-                        <div className="mt-12 grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
+                        {/* Results Header */}
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-2xl font-bold text-gray-900">
+                                {posts.length} Properties Found
+                            </h3>
+                            <div className="text-sm text-gray-500">
+                                Page {currentPage} of {totalPages}
+                            </div>
+                        </div>
+
+                        {/* Listings Grid */}
+                        <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 mb-12">
                             {posts.map(post => (
                                 <PostCard key={post._id} post={post} />
                             ))}
                         </div>
+
+                        {/* Pagination */}
                         <Pagination 
                             currentPage={currentPage}
                             totalPages={totalPages}
@@ -113,10 +226,23 @@ const ListingsSection = () => {
                         />
                     </>
                 ) : (
-                    <p className="text-center mt-12 text-gray-500 text-xl">No listings match your criteria.</p>
+                    <div className="text-center py-20">
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 max-w-md mx-auto">
+                            <div className="text-gray-600 text-xl font-semibold mb-2">No Properties Found</div>
+                            <p className="text-gray-500 mb-4">Try adjusting your search criteria or clear filters to see more results.</p>
+                            {hasActiveFilters && (
+                                <button
+                                    onClick={clearFilters}
+                                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                >
+                                    Clear Filters
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 )}
             </div>
-        </section>
+        </div>
     );
 };
 
