@@ -3,6 +3,36 @@ import { Link, NavLink } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../../firebase.config'; // আপনার Firebase কনফিগারেশন ফাইল
 
+const UserAvatar = ({ user, className = 'w-12 h-12' }) => {
+    const [imageError, setImageError] = useState(false);
+
+    useEffect(() => {
+        setImageError(false);
+    }, [user]);
+
+    const handleImageError = () => {
+        setImageError(true);
+    };
+
+    if (user && user.photoURL && !imageError) {
+        return (
+            <img
+                src={user.photoURL}
+                alt="Profile"
+                className={`rounded-full object-cover shadow-lg ${className}`}
+                onError={handleImageError}
+            />
+        );
+    }
+
+    return (
+        <div className={`rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg ${className}`}>
+            {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+        </div>
+    );
+};
+
+
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -133,45 +163,15 @@ const Navbar = () => {
                                     className="focus:outline-none rounded-full relative group"
                                 >
                                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
-                                    {currentUser.photoURL ? (
-                                        <img 
-                                            src={currentUser.photoURL} 
-                                            alt="Profile" 
-                                            className="relative w-12 h-12 rounded-full border-3 border-white shadow-lg object-cover"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                e.target.nextSibling.style.display = 'flex';
-                                            }}
-                                        />
-                                    ) : null}
-                                    <div 
-                                        className={`relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg ${currentUser.photoURL ? 'hidden' : 'flex'}`}
-                                        style={currentUser.photoURL ? {display: 'none'} : {}}
-                                    >
-                                        {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase() || 'U'}
+                                    <div className="relative">
+                                        <UserAvatar user={currentUser} />
                                     </div>
                                 </button>
 
                                 {isUserMenuOpen && (
                                     <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl py-2 z-20 border border-slate-200/50 backdrop-blur-lg">
                                         <div className="px-4 py-4 border-b border-slate-100 flex items-center space-x-3">
-                                            {currentUser.photoURL ? (
-                                                <img 
-                                                    src={currentUser.photoURL} 
-                                                    alt="Profile" 
-                                                    className="w-12 h-12 rounded-full object-cover shadow-md"
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
-                                                />
-                                            ) : null}
-                                            <div 
-                                                className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md ${currentUser.photoURL ? 'hidden' : 'flex'}`}
-                                                style={currentUser.photoURL ? {display: 'none'} : {}}
-                                            >
-                                                {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase() || 'U'}
-                                            </div>
+                                            <UserAvatar user={currentUser} className="w-12 h-12" />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-semibold text-slate-900 truncate">{currentUser.displayName || 'User'}</p>
                                                 <p className="text-xs text-slate-500 truncate">{currentUser.email}</p>
@@ -289,23 +289,7 @@ const Navbar = () => {
                                 onClick={() => setIsMobileMenuOpen(false)} 
                                 className="flex items-center space-x-4 p-4 rounded-xl hover:bg-slate-50 transition-all duration-300"
                             >
-                                 {currentUser.photoURL ? (
-                                    <img 
-                                        src={currentUser.photoURL} 
-                                        alt="Profile" 
-                                        className="w-12 h-12 rounded-full object-cover shadow-md"
-                                        onError={(e) => {
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling.style.display = 'flex';
-                                        }}
-                                    />
-                                 ) : null}
-                                 <div 
-                                    className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md ${currentUser.photoURL ? 'hidden' : 'flex'}`}
-                                    style={currentUser.photoURL ? {display: 'none'} : {}}
-                                 >
-                                    {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase() || 'U'}
-                                 </div>
+                                <UserAvatar user={currentUser} className="w-12 h-12" />
                                  <div className="flex-1 min-w-0">
                                      <p className="font-semibold text-slate-900 truncate">{currentUser.displayName || 'Dashboard'}</p>
                                      <p className="text-sm text-slate-500 truncate">View your dashboard</p>

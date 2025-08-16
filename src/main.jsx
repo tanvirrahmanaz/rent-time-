@@ -63,7 +63,7 @@ const router = createBrowserRouter([
         element: <HousePage />,
       },
       {
-        path: "/roommate",
+        path: "/roommates",
         element: <RoommatePage />,
       },
       {

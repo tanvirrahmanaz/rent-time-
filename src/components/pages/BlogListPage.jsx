@@ -29,7 +29,7 @@ const BlogListPage = () => {
                 </div>
             </div>
         </div>
-    );
+    ); 
 };
 
 export default BlogListPage;
