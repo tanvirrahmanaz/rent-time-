@@ -62,7 +62,7 @@ const Testimonials = () => {
                                 <div className="ml-4">
                                     <p className="font-bold text-gray-900">{testimonial.name}</p>
                                     <p className="text-sm text-gray-600">{testimonial.role}</p>
-                                </div> {/* <--- এখানে ভুলটি ছিল */}
+                                </div> 
                             </div>
                         </div>
                     ))}
