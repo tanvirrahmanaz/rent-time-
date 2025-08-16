@@ -137,13 +137,19 @@ const Navbar = () => {
                                         <img 
                                             src={currentUser.photoURL} 
                                             alt="Profile" 
-                                            className="relative w-12 h-12 rounded-full border-3 border-white shadow-lg object-cover" 
+                                            className="relative w-12 h-12 rounded-full border-3 border-white shadow-lg object-cover"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.nextSibling.style.display = 'flex';
+                                            }}
                                         />
-                                    ) : (
-                                        <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                                            {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
-                                        </div>
-                                    )}
+                                    ) : null}
+                                    <div 
+                                        className={`relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg ${currentUser.photoURL ? 'hidden' : 'flex'}`}
+                                        style={currentUser.photoURL ? {display: 'none'} : {}}
+                                    >
+                                        {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase() || 'U'}
+                                    </div>
                                 </button>
 
                                 {isUserMenuOpen && (
@@ -153,13 +159,19 @@ const Navbar = () => {
                                                 <img 
                                                     src={currentUser.photoURL} 
                                                     alt="Profile" 
-                                                    className="w-12 h-12 rounded-full object-cover shadow-md" 
+                                                    className="w-12 h-12 rounded-full object-cover shadow-md"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
                                                 />
-                                            ) : (
-                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                                                    {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
-                                                </div>
-                                            )}
+                                            ) : null}
+                                            <div 
+                                                className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md ${currentUser.photoURL ? 'hidden' : 'flex'}`}
+                                                style={currentUser.photoURL ? {display: 'none'} : {}}
+                                            >
+                                                {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase() || 'U'}
+                                            </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-semibold text-slate-900 truncate">{currentUser.displayName || 'User'}</p>
                                                 <p className="text-xs text-slate-500 truncate">{currentUser.email}</p>
@@ -282,12 +294,18 @@ const Navbar = () => {
                                         src={currentUser.photoURL} 
                                         alt="Profile" 
                                         className="w-12 h-12 rounded-full object-cover shadow-md"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
+                                        }}
                                     />
-                                 ) : (
-                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                                        {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
-                                    </div>
-                                 )}
+                                 ) : null}
+                                 <div 
+                                    className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md ${currentUser.photoURL ? 'hidden' : 'flex'}`}
+                                    style={currentUser.photoURL ? {display: 'none'} : {}}
+                                 >
+                                    {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.email?.charAt(0).toUpperCase() || 'U'}
+                                 </div>
                                  <div className="flex-1 min-w-0">
                                      <p className="font-semibold text-slate-900 truncate">{currentUser.displayName || 'Dashboard'}</p>
                                      <p className="text-sm text-slate-500 truncate">View your dashboard</p>
