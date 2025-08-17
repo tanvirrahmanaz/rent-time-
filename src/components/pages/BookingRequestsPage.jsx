@@ -1,21 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Divider,
+  Chip,
+  Button,
+  CircularProgress,
+  Alert,
+  Avatar,
+  Stack,
+  Box,
+  IconButton
+} from '@mui/material';
+import {
+  Check as ApproveIcon,
+  Close as RejectIcon,
+  Email as EmailIcon,
+  Person as PersonIcon,
+  Home as HomeIcon
+} from '@mui/icons-material';
 import { auth } from '../../firebase.config';
 import { Link } from 'react-router-dom';
 
 const BookingRequestsPage = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const fetchBookingRequests = async () => {
         try {
             const token = await auth.currentUser.getIdToken();
-            const response = await fetch('http://localhost:5000/api/bookings/received', {
+            const response = await fetch('https://rent-time.vercel.app/api/bookings/received', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch booking requests');
+            }
+            
             const data = await response.json();
             setBookings(data);
         } catch (error) {
-            console.error("Error fetching requests:", error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -30,7 +58,7 @@ const BookingRequestsPage = () => {
     const handleStatusUpdate = async (bookingId, status) => {
         try {
             const token = await auth.currentUser.getIdToken();
-            await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
+            const response = await fetch(`https://rent-time.vercel.app/api/bookings/${bookingId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -38,47 +66,194 @@ const BookingRequestsPage = () => {
                 },
                 body: JSON.stringify({ status })
             });
-            // স্ট্যাটাস আপডেটের পর তালিকাটি রিফ্রেশ করুন
-            fetchBookingRequests(); 
+            
+            if (!response.ok) {
+                throw new Error('Failed to update booking status');
+            }
+            
+            fetchBookingRequests();
         } catch (error) {
-            console.error("Failed to update status:", error);
+            setError(error.message);
         }
     };
 
-    if (loading) return <p>Loading booking requests...</p>;
+    const StatusChip = ({ status }) => {
+        const statusConfig = {
+            Pending: {
+                color: 'warning',
+                icon: <PersonIcon fontSize="small" />
+            },
+            Approved: {
+                color: 'success',
+                icon: <ApproveIcon fontSize="small" />
+            },
+            Rejected: {
+                color: 'error',
+                icon: <RejectIcon fontSize="small" />
+            }
+        };
+
+        return (
+            <Chip
+                icon={statusConfig[status]?.icon}
+                label={status}
+                color={statusConfig[status]?.color}
+                variant="outlined"
+                sx={{ 
+                    fontWeight: 600,
+                    borderRadius: 1
+                }}
+            />
+        );
+    };
+
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container maxWidth="md" sx={{ py: 4 }}>
+                <Alert severity="error" sx={{ mb: 3 }}>
+                    {error}
+                </Alert>
+            </Container>
+        );
+    }
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6">Booking Requests for Your Posts</h1>
+        <Container maxWidth="md" sx={{ py: 4 }}>
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
+                    Booking Requests
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                    Manage requests for your listings
+                </Typography>
+            </Box>
+
             {bookings.length === 0 ? (
-                <p>You have no booking requests yet.</p>
+                <Card elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                        No Booking Requests
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                        You haven't received any booking requests yet.
+                    </Typography>
+                    <Button 
+                        variant="contained" 
+                        component={Link} 
+                        to="/dashboard"
+                        startIcon={<HomeIcon />}
+                    >
+                        View Your Listings
+                    </Button>
+                </Card>
             ) : (
-                <div className="space-y-4">
+                <Stack spacing={3}>
                     {bookings.map(booking => (
-                        <div key={booking._id} className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
-                            <div>
-                                <p className="font-semibold">{booking.requesterName} ({booking.requesterEmail})</p>
-                                <p className="text-sm text-gray-600">
-                                    Requested for: <Link to={`/post/${booking.postId._id}`} className="text-indigo-600 font-bold">{booking.postId.title}</Link>
-                                </p>
-                                <p className={`mt-2 text-sm font-bold ${
-                                    booking.status === 'Approved' ? 'text-green-600' :
-                                    booking.status === 'Rejected' ? 'text-red-600' : 'text-yellow-600'
-                                }`}>
-                                    Status: {booking.status}
-                                </p>
-                            </div>
-                            {booking.status === 'Pending' && (
-                                <div className="flex space-x-2">
-                                    <button onClick={() => handleStatusUpdate(booking._id, 'Approved')} className="bg-green-500 text-white px-3 py-1 rounded-md text-sm">Approve</button>
-                                    <button onClick={() => handleStatusUpdate(booking._id, 'Rejected')} className="bg-red-500 text-white px-3 py-1 rounded-md text-sm">Reject</button>
-                                </div>
-                            )}
-                        </div>
+                        <Card key={booking._id} elevation={3} sx={{ borderRadius: 3 }}>
+                            <CardContent>
+                                <Box sx={{ 
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    mb: 2
+                                }}>
+                                    <Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            <Avatar sx={{ 
+                                                bgcolor: 'primary.main', 
+                                                width: 32, 
+                                                height: 32,
+                                                mr: 1
+                                            }}>
+                                                <PersonIcon fontSize="small" />
+                                            </Avatar>
+                                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                                {booking.requesterName}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            <EmailIcon color="action" fontSize="small" sx={{ mr: 1 }} />
+                                            <Typography variant="body2" color="text.secondary">
+                                                {booking.requesterEmail}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                    <StatusChip status={booking.status} />
+                                </Box>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                <Box sx={{ mb: 2 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        REQUESTED FOR:
+                                    </Typography>
+                                    <Typography 
+                                        component={Link} 
+                                        to={`/post/${booking.postId._id}`}
+                                        variant="subtitle1" 
+                                        sx={{ 
+                                            fontWeight: 600,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            textDecoration: 'none',
+                                            '&:hover': {
+                                                textDecoration: 'underline'
+                                            }
+                                        }}
+                                    >
+                                        <HomeIcon fontSize="small" sx={{ mr: 1 }} />
+                                        {booking.postId.title}
+                                    </Typography>
+                                </Box>
+
+                                {booking.status === 'Pending' && (
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'flex-end',
+                                        gap: 1,
+                                        pt: 2
+                                    }}>
+                                        <Button
+                                            variant="contained"
+                                            color="success"
+                                            size="small"
+                                            startIcon={<ApproveIcon />}
+                                            onClick={() => handleStatusUpdate(booking._id, 'Approved')}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none'
+                                            }}
+                                        >
+                                            Approve
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            size="small"
+                                            startIcon={<RejectIcon />}
+                                            onClick={() => handleStatusUpdate(booking._id, 'Rejected')}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none'
+                                            }}
+                                        >
+                                            Reject
+                                        </Button>
+                                    </Box>
+                                )}
+                            </CardContent>
+                        </Card>
                     ))}
-                </div>
+                </Stack>
             )}
-        </div>
+        </Container>
     );
 };
 

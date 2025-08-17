@@ -21,29 +21,41 @@ const ListingsSection = () => {
     const [showFilters, setShowFilters] = useState(false);
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            setLoading(true);
-            try {
-                const query = new URLSearchParams({
-                    page: currentPage,
-                    limit: 9,
-                    ...filters
-                }).toString();
-                
-                const response = await fetch(`http://localhost:5000/api/posts?${query}`);
-                if (!response.ok) throw new Error('Failed to fetch posts.');
-                
-                const data = await response.json();
-                setPosts(data.posts);
-                setTotalPages(data.totalPages);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchPosts = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const activeFilters = Object.fromEntries(
+                Object.entries(filters).filter(([_, value]) => value !== '')
+            );
+            const query = new URLSearchParams({
+                page: currentPage,
+                limit: 9,
+                ...activeFilters
+            }).toString();
+            
+            const response = await fetch(`https://rent-time.vercel.app/api/posts?${query}`);
+            if (!response.ok) throw new Error('Failed to fetch posts.');
+            
+            const data = await response.json();
+            setPosts(data.posts);
+            setTotalPages(data.totalPages);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Debounce লজিক: ৫০০ মিলিসেকেন্ড অপেক্ষা করার পর API কল হবে
+    const debounceTimeout = setTimeout(() => {
         fetchPosts();
-    }, [currentPage, filters]);
+    }, 500); // 500ms delay
+
+    // Cleanup ফাংশন: ব্যবহারকারী টাইপ করা অবস্থায় থাকলে আগের setTimeout ক্লিয়ার হয়ে যাবে
+    return () => clearTimeout(debounceTimeout);
+
+}, [currentPage, filters]); // Dependency একই থাকবে
 
     const handleFilterChange = (e) => {
         setFilters({

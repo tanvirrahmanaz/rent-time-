@@ -1,6 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper,
+  Button,
+  CircularProgress,
+  Alert,
+  IconButton,
+  Chip
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import { auth } from '../../firebase.config';
+import { 
+  Delete, 
+  Visibility, 
+  House, 
+  Groups 
+} from '@mui/icons-material';
 
 const MyPostsList = () => {
     const [myPosts, setMyPosts] = useState([]);
@@ -10,10 +32,10 @@ const MyPostsList = () => {
     useEffect(() => {
         const fetchMyPosts = async () => {
             try {
-                const token = await auth.currentUser.getIdToken(); // Firebase থেকে JWT টোকেন নিন
-                const response = await fetch('http://localhost:5000/api/my-posts', {
+                const token = await auth.currentUser.getIdToken();
+                const response = await fetch('https://rent-time.vercel.app/api/my-posts', {
                     headers: {
-                        'Authorization': `Bearer ${token}` // 헤더ে টোকেন পাঠান
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -39,7 +61,7 @@ const MyPostsList = () => {
 
         try {
             const token = await auth.currentUser.getIdToken();
-            const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+            const response = await fetch(`https://rent-time.vercel.app/api/posts/${postId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -47,50 +69,120 @@ const MyPostsList = () => {
             });
             if (!response.ok) throw new Error('Failed to delete the post.');
             
-            // UI থেকে পোস্টটি রিমুভ করুন
             setMyPosts(myPosts.filter(post => post._id !== postId));
         } catch (err) {
             setError(err.message);
         }
     };
 
+    if (loading) return (
+        <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            py: 4 
+        }}>
+            <CircularProgress />
+        </Box>
+    );
 
-    if (loading) return <p>Loading your posts...</p>;
-    if (error) return <p className="text-red-500">Error: {error}</p>;
+    if (error) return (
+        <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+        </Alert>
+    );
 
     return (
-        <div className="bg-white shadow-xl rounded-lg overflow-hidden">
-            <h2 className="text-2xl font-bold p-6 border-b">Your Listings</h2>
+        <Paper elevation={3} sx={{ 
+            mb: 6,
+            borderRadius: 3,
+            overflow: 'hidden'
+        }}>
+            <Box sx={{ 
+                p: 3,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText'
+            }}>
+                <Typography variant="h5" component="h2" sx={{ 
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center'
+                }}>
+                    <House sx={{ mr: 1 }} /> Your Listings
+                </Typography>
+            </Box>
+            
             {myPosts.length === 0 ? (
-                <p className="p-6 text-gray-500">You have not created any posts yet.</p>
+                <Box sx={{ p: 4, textAlign: 'center' }}>
+                    <Typography variant="body1" color="text.secondary">
+                        You have not created any posts yet.
+                    </Typography>
+                    <Button 
+                        component={Link} 
+                        to="/create-post" 
+                        variant="contained" 
+                        sx={{ mt: 2 }}
+                    >
+                        Create Your First Post
+                    </Button>
+                </Box>
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rent</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow sx={{ bgcolor: 'background.paper' }}>
+                                <TableCell sx={{ fontWeight: 600 }}>Title</TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>Rent</TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
                             {myPosts.map(post => (
-                                <tr key={post._id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{post.title}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{post.postType}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{post.rent} BDT</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
-                                        <Link to={`/post/${post._id}`} className="text-indigo-600 hover:text-indigo-900">View</Link>
-                                        <button onClick={() => handleDelete(post._id)} className="text-red-600 hover:text-red-900">Delete</button>
-                                    </td>
-                                </tr>
+                                <TableRow key={post._id} hover>
+                                    <TableCell>
+                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                            {post.title}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip 
+                                            label={post.postType} 
+                                            icon={post.postType === 'house' ? <House /> : <Groups />}
+                                            color={post.postType === 'house' ? 'primary' : 'secondary'}
+                                            variant="outlined"
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body1" color="text.secondary">
+                                            {post.rent} BDT
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <IconButton
+                                                component={Link}
+                                                to={`/post/${post._id}`}
+                                                color="primary"
+                                                size="small"
+                                            >
+                                                <Visibility />
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={() => handleDelete(post._id)}
+                                                color="error"
+                                                size="small"
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
                             ))}
-                        </tbody>
-                    </table>
-                </div>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             )}
-        </div>
+        </Paper>
     );
 };
 

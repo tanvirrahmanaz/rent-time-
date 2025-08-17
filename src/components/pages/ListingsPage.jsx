@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PostCard from '../Shared/PostCard';
 import Pagination from '../Shared/Pagination';
+// 'Link' ইমপোর্ট করার আর প্রয়োজন নেই, কারণ PostCard নিজেই একটি লিঙ্ক
 
 const ListingsPage = ({ postType, title, subtitle }) => {
     const [posts, setPosts] = useState([]);
@@ -14,8 +15,7 @@ const ListingsPage = ({ postType, title, subtitle }) => {
         const fetchListings = async () => {
             setLoading(true);
             try {
-                // API URL এ postType অনুযায়ী ফিল্টার যোগ করুন
-                const response = await fetch(`http://localhost:5000/api/posts?page=${currentPage}&limit=${postsPerPage}&type=${postType}`);
+                const response = await fetch(`https://rent-time.vercel.app/api/posts?page=${currentPage}&limit=${postsPerPage}&type=${postType}`);
                 if (!response.ok) throw new Error(`Failed to fetch ${postType} listings.`);
                 
                 const data = await response.json();
@@ -30,7 +30,7 @@ const ListingsPage = ({ postType, title, subtitle }) => {
         };
 
         fetchListings();
-    }, [currentPage, postType]); // currentPage বা postType পরিবর্তন হলে আবার ডেটা আনবে
+    }, [currentPage, postType]);
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -52,9 +52,9 @@ const ListingsPage = ({ postType, title, subtitle }) => {
                     <>
                         <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
                             {posts.map(post => (
-                                <Link to={`/post/${post._id}`} key={post._id}>
-                                    <PostCard post={post} />
-                                </Link>
+                                // --- পরিবর্তন এখানে ---
+                                // এখান থেকে <Link> wrapper টি সরিয়ে দেওয়া হয়েছে
+                                <PostCard key={post._id} post={post} />
                             ))}
                         </div>
                         

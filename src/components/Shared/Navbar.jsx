@@ -75,7 +75,7 @@ const Navbar = () => {
     const publicNavLinks = [
         { to: '/', text: 'Home' },
         { to: '/house', text: 'Houses' },
-        { to: '/roommate', text: 'Roommates' },
+        { to: '/roommates', text: 'Roommates' },
         { to: '/blog', text: 'Blog' },
     ];
     

@@ -1,21 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Container, 
+  Typography, 
+  Card, 
+  CardContent, 
+  Divider, 
+  Chip, 
+  Button, 
+  CircularProgress,
+  Alert,
+  Avatar,
+  Stack
+} from '@mui/material';
+import { 
+  Home, 
+  Schedule, 
+  Cancel, 
+  CheckCircle, 
+  Close, 
+  HelpOutline 
+} from '@mui/icons-material';
 import { auth } from '../../firebase.config';
 import { Link } from 'react-router-dom';
 
 const MyRequestsPage = () => {
     const [myRequests, setMyRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const fetchMyRequests = async () => {
         try {
             const token = await auth.currentUser.getIdToken();
-            const response = await fetch('http://localhost:5000/api/bookings/sent', {
+            const response = await fetch('https://rent-time.vercel.app/api/bookings/sent', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch requests');
+            }
+            
             const data = await response.json();
             setMyRequests(data);
         } catch (error) {
-            console.error("Error fetching sent requests:", error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -32,65 +60,173 @@ const MyRequestsPage = () => {
 
         try {
             const token = await auth.currentUser.getIdToken();
-            await fetch(`http://localhost:5000/api/bookings/${bookingId}`, {
+            const response = await fetch(`https://rent-time.vercel.app/api/bookings/${bookingId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            // তালিকা থেকে বাতিল করা রিকোয়েস্টটি সরিয়ে দিন
+            
+            if (!response.ok) {
+                throw new Error('Failed to cancel request');
+            }
+            
             setMyRequests(myRequests.filter(req => req._id !== bookingId));
         } catch (error) {
-            console.error("Failed to cancel request:", error);
+            setError(error.message);
         }
     };
 
     const StatusBadge = ({ status }) => {
-        const colorClasses = {
-            Pending: 'bg-yellow-100 text-yellow-800',
-            Approved: 'bg-green-100 text-green-800',
-            Rejected: 'bg-red-100 text-red-800',
+        const statusConfig = {
+            Pending: {
+                icon: <HelpOutline fontSize="small" />,
+                color: 'warning',
+                label: 'Pending'
+            },
+            Approved: {
+                icon: <CheckCircle fontSize="small" />,
+                color: 'success',
+                label: 'Approved'
+            },
+            Rejected: {
+                icon: <Close fontSize="small" />,
+                color: 'error',
+                label: 'Rejected'
+            },
         };
-        return <span className={`px-3 py-1 text-xs font-semibold rounded-full ${colorClasses[status]}`}>{status}</span>;
+
+        return (
+            <Chip
+                icon={statusConfig[status]?.icon}
+                label={statusConfig[status]?.label}
+                color={statusConfig[status]?.color}
+                variant="outlined"
+                size="small"
+                sx={{ 
+                    borderRadius: 1,
+                    fontWeight: 600
+                }}
+            />
+        );
     };
 
-    if (loading) return <p className="p-10 text-center">Loading your requests...</p>;
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container maxWidth="md" sx={{ py: 4 }}>
+                <Alert severity="error" sx={{ mb: 3 }}>
+                    {error}
+                </Alert>
+            </Container>
+        );
+    }
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6">My Booking Requests</h1>
+        <Container maxWidth="md" sx={{ py: 4 }}>
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
+                    My Booking Requests
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                    View and manage your sent booking requests
+                </Typography>
+            </Box>
+
             {myRequests.length === 0 ? (
-                <p className="text-gray-600">You have not sent any booking requests yet.</p>
+                <Card elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                        No Requests Found
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                        You haven't sent any booking requests yet.
+                    </Typography>
+                    <Button 
+                        variant="contained" 
+                        component={Link} 
+                        to="/posts"
+                        startIcon={<Home />}
+                    >
+                        Browse Listings
+                    </Button>
+                </Card>
             ) : (
-                <div className="space-y-4">
+                <Stack spacing={3}>
                     {myRequests.map(request => (
-                        <div key={request._id} className="bg-white p-4 rounded-lg shadow-md">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-sm text-gray-500">Request for:</p>
-                                    <Link to={`/post/${request.postId?._id}`} className="text-lg font-bold text-indigo-700 hover:underline">
-                                        {request.postId?.title || 'Post Deleted'}
-                                    </Link>
-                                    <p className="text-sm text-gray-600 mt-1">{request.postId?.location}</p>
-                                </div>
-                                <StatusBadge status={request.status} />
-                            </div>
-                            <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                                <p className="text-xs text-gray-500">
-                                    Sent on: {new Date(request.createdAt).toLocaleDateString()}
-                                </p>
-                                {request.status === 'Pending' && (
-                                    <button 
-                                        onClick={() => handleCancelRequest(request._id)} 
-                                        className="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600"
-                                    >
-                                        Cancel Request
-                                    </button>
-                                )}
-                            </div>
-                        </div>
+                        <Card key={request._id} elevation={3} sx={{ borderRadius: 3 }}>
+                            <CardContent>
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    mb: 2
+                                }}>
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            REQUEST FOR:
+                                        </Typography>
+                                        <Typography 
+                                            component={Link} 
+                                            to={`/post/${request.postId?._id}`}
+                                            variant="h6" 
+                                            sx={{ 
+                                                fontWeight: 600,
+                                                textDecoration: 'none',
+                                                '&:hover': {
+                                                    textDecoration: 'underline'
+                                                }
+                                            }}
+                                        >
+                                            {request.postId?.title || 'Post Deleted'}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {request.postId?.location || 'Location not available'}
+                                        </Typography>
+                                    </Box>
+                                    <StatusBadge status={request.status} />
+                                </Box>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Schedule color="action" sx={{ mr: 1 }} />
+                                        <Typography variant="caption">
+                                            Sent on: {new Date(request.createdAt).toLocaleDateString()}
+                                        </Typography>
+                                    </Box>
+
+                                    {request.status === 'Pending' && (
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            size="small"
+                                            startIcon={<Cancel />}
+                                            onClick={() => handleCancelRequest(request._id)}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none'
+                                            }}
+                                        >
+                                            Cancel Request
+                                        </Button>
+                                    )}
+                                </Box>
+                            </CardContent>
+                        </Card>
                     ))}
-                </div>
+                </Stack>
             )}
-        </div>
+        </Container>
     );
 };
 

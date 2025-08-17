@@ -1,50 +1,89 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { staticBlogPosts } from '../../data/mockBlogs'; // স্ট্যাটিক ডেটা ইমপোর্ট করুন
 
 const BlogPostPage = () => {
-    const { slug } = useParams(); // URL থেকে slug নিন
+    const { slug } = useParams();
+    
+    // Static blog posts data
+    const posts = [
+        {
+            id: 1,
+            slug: 'first-post',
+            title: 'First Blog Post',
+            content: '<p>This is the full content of the first blog post.</p><p>You can add multiple paragraphs here.</p>',
+            date: '2023-05-15',
+            author: 'Admin'
+        },
+        {
+            id: 2,
+            slug: 'second-post',
+            title: 'Second Blog Post',
+            content: '<p>This is the full content of the second blog post.</p><p>More details about the topic.</p>',
+            date: '2023-06-20',
+            author: 'Editor'
+        },
+        {
+            id: 3,
+            slug: 'third-post',
+            title: 'Third Blog Post',
+            content: '<p>This is the full content of the third blog post.</p><p>Final thoughts on the subject.</p>',
+            date: '2023-07-10',
+            author: 'Writer'
+        }
+    ];
 
-    // স্ট্যাটিক অ্যারে থেকে slug অনুযায়ী সঠিক পোস্টটি খুঁজুন
-    const post = staticBlogPosts.find(p => p.slug === slug);
+    const post = posts.find(p => p.slug === slug);
 
     if (!post) {
         return (
-            <div className="text-center p-20">
-                <h1 className="text-4xl font-bold">404 - Post Not Found</h1>
-                <p className="mt-4">The blog post you are looking for does not exist.</p>
-                <Link to="/blog" className="mt-6 inline-block text-indigo-600 hover:underline">
-                    &larr; Back to all blogs
+            <div style={{ 
+                maxWidth: '800px', 
+                margin: '0 auto', 
+                padding: '20px',
+                textAlign: 'center'
+            }}>
+                <h1>404 - Post Not Found</h1>
+                <p>The blog post you are looking for does not exist.</p>
+                <Link 
+                    to="/blog"
+                    style={{
+                        display: 'inline-block',
+                        marginTop: '20px',
+                        color: '#0066cc',
+                        textDecoration: 'none'
+                    }}
+                >
+                    ← Back to all blogs
                 </Link>
             </div>
         );
     }
 
     return (
-        <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-                <article>
-                    <header className="mb-8 text-center">
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">{post.title}</h1>
-                        <p className="mt-4 text-gray-500">
-                            By {post.author} on {new Date(post.createdAt).toLocaleDateString()}
-                        </p>
-                    </header>
-                    <img className="w-full h-auto rounded-lg shadow-lg mb-8" src={post.featuredImage} alt={post.title} />
-                    
-                    {/* `prose` ক্লাসটি Tailwind Typography প্লাগইন থেকে আসে, যা HTML রেন্ডারিংকে সুন্দর করে */}
-                    <div 
-                        className="prose prose-lg max-w-none"
-                        dangerouslySetInnerHTML={{ __html: post.content }} 
-                    />
-
-                    <div className="mt-10 border-t pt-6">
-                        <Link to="/blog" className="text-indigo-600 hover:underline font-semibold">
-                            &larr; Back to all blog posts
-                        </Link>
-                    </div>
-                </article>
-            </div>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+            <article>
+                <h1 style={{ marginBottom: '10px' }}>{post.title}</h1>
+                <p style={{ color: '#666', marginBottom: '20px' }}>
+                    By {post.author} on {new Date(post.date).toLocaleDateString()}
+                </p>
+                
+                <div 
+                    dangerouslySetInnerHTML={{ __html: post.content }} 
+                    style={{ lineHeight: '1.6' }}
+                />
+                
+                <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #ddd' }}>
+                    <Link 
+                        to="/blog"
+                        style={{
+                            color: '#0066cc',
+                            textDecoration: 'none'
+                        }}
+                    >
+                        ← Back to all blog posts
+                    </Link>
+                </div>
+            </article>
         </div>
     );
 };
