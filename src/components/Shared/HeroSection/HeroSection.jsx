@@ -13,7 +13,7 @@ const heroCardsData = [
         title: 'I need a roommate',
         description: 'Create a listing to find your ideal roommate and share living expenses.',
         buttonText: 'Find Roommate',
-        route: '/roommate',
+        route: '/roommates',
         gradient: 'from-violet-500 to-purple-600',
         hoverGradient: 'from-violet-600 to-purple-700'
     },
