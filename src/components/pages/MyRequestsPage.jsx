@@ -32,7 +32,7 @@ const MyRequestsPage = () => {
     const fetchMyRequests = async () => {
         try {
             const token = await auth.currentUser.getIdToken();
-            const response = await fetch('https://rent-time.vercel.app/api/bookings/sent', {
+            const response = await fetch('http://localhost:5000/api/bookings/sent', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -60,7 +60,7 @@ const MyRequestsPage = () => {
 
         try {
             const token = await auth.currentUser.getIdToken();
-            const response = await fetch(`https://rent-time.vercel.app/api/bookings/${bookingId}`, {
+            const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

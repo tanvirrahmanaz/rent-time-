@@ -50,7 +50,7 @@ const PostDetailsPage = () => {
         setIsBookingLoading(true);
         try {
             const token = await currentUser.getIdToken();
-            const response = await fetch('https://rent-time.vercel.app/api/bookings', {
+            const response = await fetch('http://localhost:5000/api/bookings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ const PostDetailsPage = () => {
         
         try {
             const token = await currentUser.getIdToken();
-            const response = await fetch(`https://rent-time.vercel.app/api/bookings/check/${id}`, {
+            const response = await fetch(`http://localhost:5000/api/bookings/check/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -97,7 +97,7 @@ const PostDetailsPage = () => {
     useEffect(() => {
         const fetchPostDetails = async () => {
             try {
-                const response = await fetch(`https://rent-time.vercel.app/api/posts/${id}`);
+                const response = await fetch(`http://localhost:5000/api/posts/${id}`);
                 if (!response.ok) throw new Error('Post not found.');
                 const data = await response.json();
                 setPost(data);

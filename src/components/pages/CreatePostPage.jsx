@@ -1,55 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Button, 
-  Card, 
-  CardContent, 
-  Container, 
-  Divider, 
-  Grid, 
-  TextField, 
-  Typography, 
-  Select, 
-  MenuItem, 
-  InputLabel, 
-  FormControl, 
-  FormHelperText,
-  Paper,
-  Chip,
-  LinearProgress,
-  Avatar,
-  IconButton
-} from '@mui/material';
-import { 
-  AddPhotoAlternate, 
-  Home, 
-  Groups, 
-  CalendarToday, 
-  Phone, 
-  Male, 
-  Female, 
-  School, 
-  Work, 
-  CheckCircle,
-  CloudUpload
-} from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-import { auth } from '../../firebase.config';
 import { useNavigate } from 'react-router-dom';
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
+import { useAuth } from '../../contexts/AuthContext'; // AuthContext ব্যবহার করুন
+import { CloudUpload } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 const CreatePostPage = () => {
+    const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: '',
@@ -65,21 +21,22 @@ const CreatePostPage = () => {
         amenities: '',
         preferredGender: 'Any',
         preferredOccupation: 'Any',
-        nidNumber: '',
-        contactPreference: 'Phone',
-        visitingHours: '',
         rules: '',
     });
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleImageChange = (e) => {
+        if (e.target.files.length > 5) {
+            alert("You can only upload a maximum of 5 images.");
+            e.target.value = null; // Reset the file input
+            return;
+        }
         setImages([...e.target.files]);
     };
 
@@ -115,7 +72,7 @@ const CreatePostPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!auth.currentUser) {
+        if (!currentUser) {
             setError("You must be logged in to create a post.");
             return;
         }
@@ -126,11 +83,9 @@ const CreatePostPage = () => {
 
         setLoading(true);
         setError('');
-        setSuccess('');
 
         try {
             const photoUrls = await uploadImagesToImgBB();
-            
             const amenitiesArray = formData.amenities ? formData.amenities.split(',').map(item => item.trim()) : [];
             const rulesArray = formData.rules ? formData.rules.split(',').map(item => item.trim()) : [];
             
@@ -143,12 +98,17 @@ const CreatePostPage = () => {
                 photos: photoUrls,
                 amenities: amenitiesArray,
                 rules: rulesArray,
-                ownerId: auth.currentUser.uid,
             };
 
-            const response = await fetch('https://rent-time.vercel.app/api/posts', {
+            const token = await currentUser.getIdToken();
+            const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+            const response = await fetch(`http://localhost:5000/api/posts`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(finalPostData),
             });
             
@@ -157,10 +117,13 @@ const CreatePostPage = () => {
                  throw new Error(result.message || "Failed to create post.");
             }
 
-            setSuccess("Post created successfully! Redirecting...");
-            setTimeout(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Post Created!',
+                text: 'Your listing has been published successfully.',
+            }).then(() => {
                 navigate('/dashboard');
-            }, 2000);
+            });
 
         } catch (err) {
             setError(err.message);
@@ -170,363 +133,79 @@ const CreatePostPage = () => {
     };
 
     return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
-            <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-                <Box sx={{ textAlign: 'center', mb: 4 }}>
-                    <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                        Create New Listing
-                    </Typography>
-                    <Typography variant="subtitle1" color="text.secondary">
-                        Fill in the details to find the perfect match
-                    </Typography>
-                </Box>
+        <div className="bg-gray-50 py-10">
+            <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg">
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-gray-800">Create a New Listing</h1>
+                    <p className="text-gray-500 mt-2">Fill in the details to find the best match for your property.</p>
+                </div>
 
-                {error && (
-                    <Box sx={{ mb: 3, p: 2, bgcolor: 'error.light', borderRadius: 2 }}>
-                        <Typography color="error">{error}</Typography>
-                    </Box>
-                )}
-                
-                {success && (
-                    <Box sx={{ mb: 3, p: 2, bgcolor: 'success.light', borderRadius: 2, display: 'flex', alignItems: 'center' }}>
-                        <CheckCircle color="success" sx={{ mr: 1 }} />
-                        <Typography color="success.main">{success}</Typography>
-                    </Box>
-                )}
+                {error && <p className="bg-red-100 text-red-700 p-3 rounded-md mb-4 text-center">{error}</p>}
 
-                {loading && <LinearProgress sx={{ mb: 3 }} />}
-
-                <form onSubmit={handleSubmit}>
-                    {/* Basic Information Section */}
-                    <Card sx={{ mb: 3 }}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Home sx={{ mr: 1 }} /> Basic Information
-                            </Typography>
-                            <Divider sx={{ mb: 3 }} />
-                            
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Title"
-                                        name="title"
-                                        value={formData.title}
-                                        onChange={handleInputChange}
-                                        required
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Description"
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleInputChange}
-                                        required
-                                        multiline
-                                        rows={4}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Post Type</InputLabel>
-                                        <Select
-                                            name="postType"
-                                            value={formData.postType}
-                                            onChange={handleInputChange}
-                                            label="Post Type"
-                                        >
-                                            <MenuItem value="house">
-                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Home sx={{ mr: 1, fontSize: 20 }} /> House/Room Rent
-                                                </Box>
-                                            </MenuItem>
-                                            <MenuItem value="roommate">
-                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Groups sx={{ mr: 1, fontSize: 20 }} /> Looking for Roommate
-                                                </Box>
-                                            </MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </Card>
-
-                    {/* Conditional Fields */}
-                    {formData.postType === 'house' ? (
-                        <Card sx={{ mb: 3 }}>
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom>
-                                    House Details
-                                </Typography>
-                                <Divider sx={{ mb: 3 }} />
-                                
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} sm={4}>
-                                        <TextField
-                                            fullWidth
-                                            label="Bedrooms"
-                                            name="bedrooms"
-                                            type="number"
-                                            value={formData.bedrooms}
-                                            onChange={handleInputChange}
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                    
-                                    <Grid item xs={12} sm={4}>
-                                        <TextField
-                                            fullWidth
-                                            label="Bathrooms"
-                                            name="bathrooms"
-                                            type="number"
-                                            value={formData.bathrooms}
-                                            onChange={handleInputChange}
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                    
-                                    <Grid item xs={12} sm={4}>
-                                        <TextField
-                                            fullWidth
-                                            label="Size (sq. ft.)"
-                                            name="size"
-                                            type="number"
-                                            value={formData.size}
-                                            onChange={handleInputChange}
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                    
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            fullWidth
-                                            label="Amenities (comma separated)"
-                                            name="amenities"
-                                            value={formData.amenities}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. WiFi, AC, Parking"
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <Card sx={{ mb: 3 }}>
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <Groups sx={{ mr: 1 }} /> Roommate Preferences
-                                </Typography>
-                                <Divider sx={{ mb: 3 }} />
-                                
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} sm={6}>
-                                        <FormControl fullWidth>
-                                            <InputLabel>Preferred Gender</InputLabel>
-                                            <Select
-                                                name="preferredGender"
-                                                value={formData.preferredGender}
-                                                onChange={handleInputChange}
-                                                label="Preferred Gender"
-                                            >
-                                                <MenuItem value="Any">Any</MenuItem>
-                                                <MenuItem value="Male">
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Male sx={{ mr: 1, fontSize: 20 }} /> Male
-                                                    </Box>
-                                                </MenuItem>
-                                                <MenuItem value="Female">
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Female sx={{ mr: 1, fontSize: 20 }} /> Female
-                                                    </Box>
-                                                </MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                    
-                                    <Grid item xs={12} sm={6}>
-                                        <FormControl fullWidth>
-                                            <InputLabel>Preferred Occupation</InputLabel>
-                                            <Select
-                                                name="preferredOccupation"
-                                                value={formData.preferredOccupation}
-                                                onChange={handleInputChange}
-                                                label="Preferred Occupation"
-                                            >
-                                                <MenuItem value="Any">Any</MenuItem>
-                                                <MenuItem value="Student">
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <School sx={{ mr: 1, fontSize: 20 }} /> Student
-                                                    </Box>
-                                                </MenuItem>
-                                                <MenuItem value="Professional">
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Work sx={{ mr: 1, fontSize: 20 }} /> Professional
-                                                    </Box>
-                                                </MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* --- Basic Info Section --- */}
+                    <div className="space-y-4 p-4 border rounded-lg">
+                        <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">Basic Information</h2>
+                        <div><label className="block text-sm font-medium text-gray-600">Title</label><input type="text" name="title" onChange={handleInputChange} required className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/></div>
+                        <div><label className="block text-sm font-medium text-gray-600">Description</label><textarea name="description" rows="4" onChange={handleInputChange} required className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea></div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Post Type</label>
+                            <select name="postType" value={formData.postType} onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="house">House/Room Rent</option>
+                                <option value="roommate">Looking for Roommate</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    {/* --- Conditional Fields --- */}
+                    {formData.postType === 'house' && (
+                        <div className="space-y-4 p-4 border rounded-lg">
+                            <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">House Details</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label className="text-sm font-medium text-gray-600">Bedrooms</label><input type="number" name="bedrooms" onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300"/></div>
+                                <div><label className="text-sm font-medium text-gray-600">Bathrooms</label><input type="number" name="bathrooms" onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300"/></div>
+                                <div><label className="text-sm font-medium text-gray-600">Size (sq. ft.)</label><input type="number" name="size" onChange={handleInputChange} className="mt-1 w-full rounded-md border-gray-300"/></div>
+                            </div>
+                            <div><label className="text-sm font-medium text-gray-600">Amenities (comma-separated)</label><input type="text" name="amenities" onChange={handleInputChange} placeholder="e.g. WiFi, AC, Parking" className="mt-1 w-full rounded-md border-gray-300"/></div>
+                        </div>
                     )}
 
-                    {/* Contact & Additional Info */}
-                    <Card sx={{ mb: 3 }}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Phone sx={{ mr: 1 }} /> Contact & Additional Information
-                            </Typography>
-                            <Divider sx={{ mb: 3 }} />
-                            
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Location"
-                                        name="location"
-                                        value={formData.location}
-                                        onChange={handleInputChange}
-                                        required
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Rent (BDT)"
-                                        name="rent"
-                                        type="number"
-                                        value={formData.rent}
-                                        onChange={handleInputChange}
-                                        required
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Contact Number"
-                                        name="contactNumber"
-                                        value={formData.contactNumber}
-                                        onChange={handleInputChange}
-                                        required
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Available From"
-                                        name="availableFrom"
-                                        type="date"
-                                        value={formData.availableFrom}
-                                        onChange={handleInputChange}
-                                        required
-                                        InputLabelProps={{ shrink: true }}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="NID Number (Optional)"
-                                        name="nidNumber"
-                                        value={formData.nidNumber}
-                                        onChange={handleInputChange}
-                                        variant="outlined"
-                                        helperText="Providing NID can increase trust with potential tenants/roommates"
-                                    />
-                                </Grid>
-                                
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Rules (comma separated)"
-                                        name="rules"
-                                        value={formData.rules}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g. No smoking, No pets"
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </Card>
+                    {/* --- Contact & Location Section --- */}
+                    <div className="space-y-4 p-4 border rounded-lg">
+                         <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">Location & Price</h2>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label className="text-sm font-medium text-gray-600">Location</label><input type="text" name="location" onChange={handleInputChange} required className="mt-1 w-full rounded-md border-gray-300"/></div>
+                            <div><label className="text-sm font-medium text-gray-600">Rent (BDT)</label><input type="number" name="rent" onChange={handleInputChange} required className="mt-1 w-full rounded-md border-gray-300"/></div>
+                            <div><label className="text-sm font-medium text-gray-600">Contact Number</label><input type="tel" name="contactNumber" onChange={handleInputChange} required className="mt-1 w-full rounded-md border-gray-300"/></div>
+                            <div><label className="text-sm font-medium text-gray-600">Available From</label><input type="date" name="availableFrom" onChange={handleInputChange} required className="mt-1 w-full rounded-md border-gray-300"/></div>
+                         </div>
+                    </div>
 
-                    {/* Image Upload */}
-                    <Card sx={{ mb: 3 }}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <AddPhotoAlternate sx={{ mr: 1 }} /> Photos
-                            </Typography>
-                            <Divider sx={{ mb: 3 }} />
-                            
-                            <Box sx={{ textAlign: 'center', p: 3, border: '1px dashed', borderRadius: 2 }}>
-                                <Button
-                                    component="label"
-                                    variant="contained"
-                                    startIcon={<CloudUpload />}
-                                >
-                                    Upload Photos
-                                    <VisuallyHiddenInput 
-                                        type="file" 
-                                        multiple 
-                                        onChange={handleImageChange} 
-                                        accept="image/*" 
-                                        required 
-                                    />
-                                </Button>
-                                <Typography variant="body2" sx={{ mt: 2 }}>
-                                    Upload at least one photo (Max 5MB each)
-                                </Typography>
-                                
-                                {images.length > 0 && (
-                                    <Box sx={{ mt: 2 }}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Selected {images.length} file(s)
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    {/* --- Image Upload Section --- */}
+                     <div className="space-y-2 p-4 border rounded-lg">
+                        <label className="block text-xl font-semibold text-gray-700">Upload Photos</label>
+                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div className="space-y-1 text-center">
+                                <CloudUpload className="mx-auto h-12 w-12 text-gray-400" />
+                                <div className="flex text-sm text-gray-600">
+                                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                                        <span>Upload files</span>
+                                        <input id="file-upload" name="images" type="file" multiple onChange={handleImageChange} required className="sr-only" />
+                                    </label>
+                                    <p className="pl-1">or drag and drop</p>
+                                </div>
+                                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                {images.length > 0 && <p className="text-sm font-medium text-green-600 mt-2">{images.length} file(s) selected</p>}
+                            </div>
+                        </div>
+                    </div>
 
-                    <Box sx={{ textAlign: 'center', mt: 4 }}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            size="large"
-                            disabled={loading}
-                            sx={{
-                                px: 6,
-                                py: 1.5,
-                                fontSize: '1.1rem',
-                                borderRadius: 2,
-                                boxShadow: 'none',
-                                '&:hover': {
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                },
-                            }}
-                        >
-                            {loading ? 'Creating Listing...' : 'Create Listing'}
-                        </Button>
-                    </Box>
+                    <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transition-all text-lg">
+                        {loading ? 'Submitting...' : 'Submit Post'}
+                    </button>
                 </form>
-            </Paper>
-        </Container>
+            </div>
+        </div>
     );
 };
 
