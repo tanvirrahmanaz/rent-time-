@@ -34,7 +34,7 @@ const MyPostsList = () => {
             const token = await user.getIdToken();
             
             // আপনার নিশ্চিত করা সঠিক URL টি ব্যবহার করা হয়েছে
-            const response = await fetch('http://localhost:5000/api/posts/my-posts', {
+            const response = await fetch('https://rent-time.vercel.app/api/posts/my-posts', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -58,7 +58,7 @@ const MyPostsList = () => {
 
         try {
             const token = await auth.currentUser.getIdToken();
-            const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+            const response = await fetch(`https://rent-time.vercel.app/api/posts/${postId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

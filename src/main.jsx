@@ -24,6 +24,10 @@ import BlogPostPage from './components/pages/BlogPostPage';
 import BookingRequestsPage from './components/pages/BookingRequestsPage';
 import MyRequestsPage from './components/pages/MyRequestsPage';
 
+import PaymentSuccessPage from './components/pages/PaymentSuccessPage';
+import PaymentCancelPage from './components/pages/PaymentCancelPage';
+
+
 // import App from './App.jsx'; // App.jsx এর আর প্রয়োজন নেই
 
 // রাউটার তৈরি করুন
@@ -90,6 +94,14 @@ const router = createBrowserRouter([
         path: "/dashboard/my-requests",
         element: (<PrivateRoute><MyRequestsPage /></PrivateRoute>),
       },
+      {
+        path:"/payment/success",
+        element: <PaymentSuccessPage />
+      },
+      {
+        path: "/payment/cancel",
+        element: <PaymentCancelPage />
+      }
 
       // এখানে আপনার অন্যান্য পেইজের জন্য রুট যোগ করতে পারেন
       // যেমন: /house, /roommate, /blog ইত্যাদি

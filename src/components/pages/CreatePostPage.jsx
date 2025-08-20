@@ -101,9 +101,8 @@ const CreatePostPage = () => {
             };
 
             const token = await currentUser.getIdToken();
-            const baseURL = import.meta.env.VITE_API_BASE_URL;
-
-            const response = await fetch(`http://localhost:5000/api/posts`, {
+            
+            const response = await fetch(`https://rent-time.vercel.app/api/posts`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
