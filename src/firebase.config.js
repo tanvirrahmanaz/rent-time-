@@ -1,8 +1,8 @@
+// firebase.config.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration using environment variables
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
   authDomain: import.meta.env.VITE_AUTH_DOMAIN,
@@ -12,9 +12,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_APP_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Firebase সার্ভিসগুলো ইনিশিয়ালাইজ করে এক্সপোর্ট করুন
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// ✅ কঠোরভাবে long‑polling ব্যবহার করাও + fetch streams বন্ধ
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: true,
+  useFetchStreams: false,
+});
