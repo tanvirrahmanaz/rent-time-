@@ -1,10 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { 
-    onAuthStateChanged, 
-    signOut, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword 
-} from 'firebase/auth';
+import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase.config';
 
 // 1. Context তৈরি করুন
@@ -37,8 +32,15 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         // onAuthStateChanged লিসেনারটি এখানে সেন্ট্রালি ম্যানেজ করা হবে
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setCurrentUser(user);
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Fetch user data from your backend or Firebase Database to get the role
+                const response = await fetch(`/api/users/${user.uid}`); // Adjust the API path accordingly
+                const userData = await response.json();
+                setCurrentUser({ ...user, role: userData.role });
+            } else {
+                setCurrentUser(null);
+            }
             setLoading(false); // অথেনটিকেশন চেক করা শেষ
         });
 

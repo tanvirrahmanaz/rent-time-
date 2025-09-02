@@ -11,12 +11,8 @@ const ListingsSection = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     
-    const [filters, setFilters] = useState({
-        type: '',
-        location: '',
-        minPrice: '',
-        maxPrice: '',
-    });
+    const [filters, setFilters] = useState({ postType:'', location:'', minRent:'', maxRent:'' });
+
 
     const [showFilters, setShowFilters] = useState(false);
 
@@ -34,12 +30,13 @@ const ListingsSection = () => {
                 ...activeFilters
             }).toString();
             
-            const response = await fetch(`https://rent-time.vercel.app/api/posts?${query}`);
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            const response = await fetch(`${API_BASE}/api/posts?${query}`);
             if (!response.ok) throw new Error('Failed to fetch posts.');
             
             const data = await response.json();
             setPosts(data.posts);
-            setTotalPages(data.totalPages);
+            setTotalPages(data.pagination?.pages || 0);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -125,7 +122,7 @@ const ListingsSection = () => {
                             </label>
                             <select 
                                 id="type" 
-                                name="type" 
+                                name="postType" 
                                 onChange={handleFilterChange} 
                                 value={filters.type}
                                 className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
@@ -162,7 +159,7 @@ const ListingsSection = () => {
                                 <input 
                                     type="number" 
                                     id="minPrice" 
-                                    name="minPrice" 
+                                    name="minRent" 
                                     onChange={handleFilterChange} 
                                     value={filters.minPrice}
                                     placeholder="Min Price"
@@ -171,7 +168,7 @@ const ListingsSection = () => {
                                 <input 
                                     type="number" 
                                     id="maxPrice" 
-                                    name="maxPrice" 
+                                    name="maxRent" 
                                     onChange={handleFilterChange} 
                                     value={filters.maxPrice}
                                     placeholder="Max Price"

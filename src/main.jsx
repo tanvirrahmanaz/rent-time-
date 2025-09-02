@@ -28,6 +28,11 @@ import PaymentSuccessPage from './components/pages/PaymentSuccessPage';
 import PaymentCancelPage from './components/pages/PaymentCancelPage';
 
 
+import AdminDashboardPage from './components/pages/admin/AdminDashboardPage.jsx';
+import AdminRoute from './components/Routes/AdminRoute.jsx';
+
+import About from './components/pages/About.jsx';
+
 // import App from './App.jsx'; // App.jsx এর আর প্রয়োজন নেই
 
 // রাউটার তৈরি করুন
@@ -79,6 +84,10 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "/about",
+        element: <About />,
+      },
+      {
         path: "/blog",
         element: <BlogListPage />,
       },
@@ -95,19 +104,31 @@ const router = createBrowserRouter([
         element: (<PrivateRoute><MyRequestsPage /></PrivateRoute>),
       },
       {
-        path:"/payment/success",
+        path: "/payment/success",
         element: <PaymentSuccessPage />
       },
       {
         path: "/payment/cancel",
         element: <PaymentCancelPage />
-      }
+      },
+      {
+        path: "/admin",
+        element: (
+          <AdminRoute>
+            <AdminDashboardPage />
+          </AdminRoute>
+        ),
+        errorElement: <NotFoundPage />,
+      },
 
       // এখানে আপনার অন্যান্য পেইজের জন্য রুট যোগ করতে পারেন
       // যেমন: /house, /roommate, /blog ইত্যাদি
     ],
   },
+
+
 ]);
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

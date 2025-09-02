@@ -1,7 +1,7 @@
 // firebase.config.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { initializeFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -14,10 +14,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-
-// ✅ কঠোরভাবে long‑polling ব্যবহার করাও + fetch streams বন্ধ
-export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-  experimentalAutoDetectLongPolling: true,
-  useFetchStreams: false,
-});
+export const db = getFirestore(app);
