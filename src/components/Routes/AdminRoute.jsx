@@ -1,23 +1,20 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+// path: src/components/Routes/AdminRoute.jsx
+import { isAdminEmail } from '../../utils/isAdmin'; // ✅ সঠিক কেস/পাথ
 import { useAuth } from '../../contexts/AuthContext';
-import { isAdminEmail } from '../../utils/isAdmin'; // নতুন ফাংশন ইমপোর্ট করুন
+import { Navigate, useLocation } from 'react-router-dom';
 
 const AdminRoute = ({ children }) => {
-    const { currentUser, loading } = useAuth();
-    const location = useLocation();
+  const { currentUser, loading } = useAuth();
+  const location = useLocation();
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+  if (loading) return <div>Loading...</div>;
 
-    // currentUser.role এর পরিবর্তে isAdminCheck(currentUser) ব্যবহার করুন
-    if (currentUser && isAdminEmail(currentUser)) {
-        return children;
-    }
+  // ✅ ইমেইল দিয়ে চেক করো
+  if (currentUser && isAdminEmail(currentUser.email)) {
+    return children;
+  }
 
-    // যদি অ্যাডমিন না হয়, হোমপেইজে পাঠিয়ে দিন
-    return <Navigate to="/" state={{ from: location }} replace />;
+  return <Navigate to="/" state={{ from: location }} replace />;
 };
 
 export default AdminRoute;
